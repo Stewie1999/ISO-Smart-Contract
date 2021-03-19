@@ -1,1 +1,1 @@
-# BMC Parallel Initial Stake Offering Smart Contract
+# BMC Parallel Initial Stake Offering™️ Smart Contract
