@@ -1177,7 +1177,7 @@ contract BMCmaster is Ownable {
     // BMC tokens created per block.
     uint256 public BMCPerBlock;
     // Bonus muliplier for early BMC makers.
-    uint256 public constant BONUS_MULTIPLIER = 10;
+    uint256 public constant BONUS_MULTIPLIER = 1;
 
     // Info of each pool.
     PoolInfo[] public poolInfo;
@@ -1196,13 +1196,11 @@ contract BMCmaster is Ownable {
         BMCToken _BMC,
         address _devaddr,
         uint256 _BMCPerBlock,
-        uint256 _startBlock,
-        uint256 _bonusEndBlock
+        uint256 _startBlock
     ) public {
         BMC = _BMC;
         devaddr = _devaddr;
         BMCPerBlock = _BMCPerBlock;
-        bonusEndBlock = _bonusEndBlock;
         startBlock = _startBlock;
     }
 
@@ -1237,18 +1235,8 @@ contract BMCmaster is Ownable {
 
 
 
-    // Return reward multiplier over the given _from to _to block.
-    function getMultiplier(uint256 _from, uint256 _to) public view returns (uint256) {
-        if (_to <= bonusEndBlock) {
-            return _to.sub(_from).mul(BONUS_MULTIPLIER);
-        } else if (_from >= bonusEndBlock) {
-            return _to.sub(_from);
-        } else {
-            return bonusEndBlock.sub(_from).mul(BONUS_MULTIPLIER).add(
-                _to.sub(bonusEndBlock)
-            );
-        }
-    }
+
+
 
     // View function to see pending BMCs on frontend.
     function pendingBMC(uint256 _pid, address _user) external view returns (uint256) {
@@ -1257,8 +1245,7 @@ contract BMCmaster is Ownable {
         uint256 accBMCPerShare = pool.accBMCPerShare;
         uint256 lpSupply = pool.lpToken.balanceOf(address(this));
         if (block.number > pool.lastRewardBlock && lpSupply != 0) {
-            uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-            uint256 BMCReward = multiplier.mul(BMCPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
+            uint256 BMCReward = BMCPerBlock.mul(pool.allocPoint).div(totalAllocPoint);
             accBMCPerShare = accBMCPerShare.add(BMCReward.mul(1e12).div(lpSupply));
         }
         return user.amount.mul(accBMCPerShare).div(1e12).sub(user.rewardDebt);
@@ -1283,9 +1270,8 @@ contract BMCmaster is Ownable {
             pool.lastRewardBlock = block.number;
             return;
         }
-        uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-        uint256 BMCReward = multiplier.mul(BMCPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
-        BMC.mint(devaddr, BMCReward.div(10));
+        uint256 BMCReward = BMCPerBlock.mul(pool.allocPoint).div(totalAllocPoint);
+        BMC.mint(devaddr, BMCReward.div(20));
         BMC.mint(address(this), BMCReward);
         pool.accBMCPerShare = pool.accBMCPerShare.add(BMCReward.mul(1e12).div(lpSupply));
         pool.lastRewardBlock = block.number;
