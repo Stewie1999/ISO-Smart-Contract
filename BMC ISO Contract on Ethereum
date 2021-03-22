@@ -1247,11 +1247,9 @@ contract BMCmaster is Ownable {
         if (_to <= bonusEndBlock) {
             return _to.sub(_from).mul(BONUS_MULTIPLIER);
         } else if (_from >= bonusEndBlock) {
-            return _to.sub(_from);
+            return 0;
         } else {
-            return bonusEndBlock.sub(_from).mul(BONUS_MULTIPLIER).add(
-                _to.sub(bonusEndBlock)
-            );
+            return bonusEndBlock.sub(_from).mul(BONUS_MULTIPLIER);
         }
     }
 
@@ -1290,7 +1288,7 @@ contract BMCmaster is Ownable {
         }
         uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
         uint256 BMCReward = multiplier.mul(BMCPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
-        BMC.mint(devaddr, BMCReward.div(10));
+        BMC.mint(devaddr, BMCReward.div(20));
         BMC.mint(address(this), BMCReward);
         pool.accBMCPerShare = pool.accBMCPerShare.add(BMCReward.mul(1e12).div(lpSupply));
         pool.lastRewardBlock = block.number;
